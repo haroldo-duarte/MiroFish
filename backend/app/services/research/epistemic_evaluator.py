@@ -30,7 +30,7 @@ class EpistemicEvaluator:
         for item in findings:
             direction = str(item.get("direction", "inconclusive")).lower()
             source_type = str(item.get("source_type", "")).lower()
-            weight = 0.5 if source_type == "simulation" else 1.0
+            weight = 0.5 if source_type in {"simulation", "simulation_report"} else 1.0
             if direction == "supports":
                 support += weight
             elif direction == "contradicts":
