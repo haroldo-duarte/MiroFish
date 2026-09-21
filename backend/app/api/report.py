@@ -147,7 +147,10 @@ def generate_report():
                 ),
             }), 409
         
-        simulation_requirement = ResearchSimulationAdapter.requirement_for(\n            simulation_id, project.simulation_requirement or ""\n        )\n        if not simulation_requirement:
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(
+            simulation_id, project.simulation_requirement or ""
+        )
+        if not simulation_requirement:
             return jsonify({
                 "success": False,
                 "error": t('api.missingSimRequirement')
@@ -270,7 +273,16 @@ def generate_report():
                         progress_callback=progress_callback,
                         report_id=report_id
                     )
-                    ReportManager.save_report(report)\n\n                    if report.status == ReportStatus.COMPLETED:\n                        ReportFindingBridge.import_report(\n                            simulation_id=simulation_id,\n                            report_id=report.report_id,\n                            markdown_content=report.markdown_content,\n                        )\n\n                    if report.status == ReportStatus.COMPLETED:
+                    ReportManager.save_report(report)
+
+                    if report.status == ReportStatus.COMPLETED:
+                        ReportFindingBridge.import_report(
+                            simulation_id=simulation_id,
+                            report_id=report.report_id,
+                            markdown_content=report.markdown_content,
+                        )
+
+                    if report.status == ReportStatus.COMPLETED:
                         task_manager.complete_task(
                             task_id,
                             result={
@@ -657,7 +669,10 @@ def chat_with_report_agent():
                 "error": t('api.missingGraphId')
             }), 400
         
-        simulation_requirement = ResearchSimulationAdapter.requirement_for(\n            simulation_id, project.simulation_requirement or ""\n        )\n        
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(
+            simulation_id, project.simulation_requirement or ""
+        )
+        
         # 创建Agent并进行对话
         agent = ReportAgent(
             graph_id=graph_id,
