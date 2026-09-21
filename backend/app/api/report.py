@@ -15,6 +15,8 @@ from ..services.simulation_manager import SimulationManager
 from ..services.simulation_runner import SimulationRunner, RunnerStatus
 from ..services.zep_graph_memory_updater import ZepGraphMemoryManager
 from ..models.project import ProjectManager, ProjectStatus
+from ..services.research.simulation_adapter import ResearchSimulationAdapter
+from ..services.research.report_finding_bridge import ReportFindingBridge
 from ..models.task import TaskManager, TaskStatus
 from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
@@ -145,7 +147,9 @@ def generate_report():
                 ),
             }), 409
         
-        simulation_requirement = project.simulation_requirement
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(
+            simulation_id, project.simulation_requirement or ""
+        )
         if not simulation_requirement:
             return jsonify({
                 "success": False,
@@ -270,6 +274,13 @@ def generate_report():
                         report_id=report_id
                     )
                     ReportManager.save_report(report)
+
+                    if report.status == ReportStatus.COMPLETED:
+                        ReportFindingBridge.import_report(
+                            simulation_id=simulation_id,
+                            report_id=report.report_id,
+                            markdown_content=report.markdown_content,
+                        )
 
                     if report.status == ReportStatus.COMPLETED:
                         task_manager.complete_task(
@@ -658,7 +669,9 @@ def chat_with_report_agent():
                 "error": t('api.missingGraphId')
             }), 400
         
-        simulation_requirement = project.simulation_requirement or ""
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(
+            simulation_id, project.simulation_requirement or ""
+        )
         
         # 创建Agent并进行对话
         agent = ReportAgent(
@@ -742,7 +755,9 @@ def get_report_sections(report_id: str):
                     {
                         "filename": "section_01.md",
                         "section_index": 1,
-                        "content": "## 执行摘要\\n\\n..."
+                        "content": "## 执行摘要
+
+..."
                     },
                     ...
                 ],
@@ -787,7 +802,9 @@ def get_single_section(report_id: str, section_index: int):
             "success": true,
             "data": {
                 "filename": "section_01.md",
-                "content": "## 执行摘要\\n\\n..."
+                "content": "## 执行摘要
+
+..."
             }
         }
     """
