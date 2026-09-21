@@ -15,6 +15,7 @@ from ..services.simulation_manager import SimulationManager
 from ..services.simulation_runner import SimulationRunner, RunnerStatus
 from ..services.zep_graph_memory_updater import ZepGraphMemoryManager
 from ..models.project import ProjectManager, ProjectStatus
+from ..services.research.simulation_adapter import ResearchSimulationAdapter
 from ..models.task import TaskManager, TaskStatus
 from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
@@ -145,8 +146,7 @@ def generate_report():
                 ),
             }), 409
         
-        simulation_requirement = project.simulation_requirement
-        if not simulation_requirement:
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(\n            simulation_id, project.simulation_requirement or ""\n        )\n        if not simulation_requirement:
             return jsonify({
                 "success": False,
                 "error": t('api.missingSimRequirement')
@@ -658,8 +658,7 @@ def chat_with_report_agent():
                 "error": t('api.missingGraphId')
             }), 400
         
-        simulation_requirement = project.simulation_requirement or ""
-        
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(\n            simulation_id, project.simulation_requirement or ""\n        )\n        
         # 创建Agent并进行对话
         agent = ReportAgent(
             graph_id=graph_id,
