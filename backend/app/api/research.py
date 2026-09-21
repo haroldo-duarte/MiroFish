@@ -133,6 +133,35 @@ def simulate_hypothesis(hypothesis_id):
     except ValueError as exc:
         return {"error": str(exc)}, 400
 
+
+@research_bp.get("/priorities")
+def priorities():
+    domain = request.args.get("domain") or "toyt"
+    hypotheses = ResearchRepository.list("hypotheses", domain)
+    evidence = ResearchRepository.list("evidence", domain)
+    experiments = ResearchRepository.list("experiments", domain)
+    importance = {"high": 3, "medium": 2, "low": 1}
+    status_uncertainty = {"untested": 3, "signal": 2.5, "inconclusive": 2.5, "contradicted": 1.5, "supported": 1}
+    rows = []
+    for h in hypotheses:
+        ev_count = sum(1 for e in evidence if h["hypothesis_id"] in e.get("hypothesis_ids", []))
+        planned = sum(1 for e in experiments if h["hypothesis_id"] in e.get("hypothesis_ids", []) and e.get("status") == "planned")
+        score = importance.get(h.get("importance"), 2) * status_uncertainty.get(h.get("status"), 3)
+        score += 1 / (1 + ev_count)
+        if planned:
+            score -= 0.25
+        rows.append({
+            "hypothesis_id": h["hypothesis_id"],
+            "statement": h["statement"],
+            "category": h["category"],
+            "status": h["status"],
+            "priority_score": round(score, 2),
+            "evidence_count": ev_count,
+            "planned_experiments": planned,
+        })
+    rows.sort(key=lambda x: x["priority_score"], reverse=True)
+    return jsonify(rows)
+
 @research_bp.get("/simulation-links")
 def list_simulation_links():
     return jsonify(ResearchRepository.list("simulation_links"))
