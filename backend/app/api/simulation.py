@@ -23,6 +23,7 @@ from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
 from ..utils.zep_lifecycle import get_graph_readers, graph_lifecycle_lock
 from ..models.project import ProjectManager
+from ..services.research.simulation_adapter import ResearchSimulationAdapter
 
 logger = get_logger('mirofish.api.simulation')
 
@@ -484,8 +485,7 @@ def prepare_simulation():
             }), 404
         
         # 获取模拟需求
-        simulation_requirement = project.simulation_requirement or ""
-        if not simulation_requirement:
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(\n            simulation_id, project.simulation_requirement or ""\n        )\n        if not simulation_requirement:
             return jsonify({
                 "success": False,
                 "error": t('api.projectMissingRequirement')
