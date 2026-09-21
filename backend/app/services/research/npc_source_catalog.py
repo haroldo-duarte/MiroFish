@@ -37,7 +37,9 @@ NPC_SOURCE_CATALOG = {
     },
     "remanejamento": {
         "sources": ["remanejamentos", "remanejamento_necessidades", "remanejamento_rodadas", "remanejamento_rodada_itens", "remanejamento_reservas"],
-        "purpose": ["operational_decisions", "conflicts", "capacity_matching", "round_history"],
+        "purpose": ["world_state", "allocation_constraints", "capacity_matching", "algorithm_iterations"],
+        "semantic_class": "algorithmic_process",
+        "agent_behavior_evidence": False,
         "sensitivity": "pseudonymize",
     },
     "patient_journey": {
@@ -59,7 +61,7 @@ NPC_SOURCE_CATALOG = {
 
 NPC_ARCHETYPE_RECIPES = {
     "therapist": ["professionals", "sessions", "groups", "pending_work", "communications", "tasks"],
-    "unit_manager": ["sessions", "pending_work", "tasks", "remanejamento"],
+    "unit_manager": ["sessions", "pending_work", "tasks"],
     "family_caregiver": ["patient_journey", "crm", "communications", "sessions"],
     "payer": ["payer", "sessions"],
 }
