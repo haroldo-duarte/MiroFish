@@ -25,7 +25,7 @@ export const researchApi = {
   listFindings(domain = 'toyt') {
     return request.get('/api/research/findings', { params: { domain } })
   },
-  assessment(id) {
+  priorities(domain = 'toyt') {\n    return request.get('/api/research/priorities', { params: { domain } })\n  },\n  assessment(id) {
     return request.get(`/api/research/hypotheses/${id}/assessment`)
   },
   simulate(id, payload) {
