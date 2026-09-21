@@ -485,7 +485,10 @@ def prepare_simulation():
             }), 404
         
         # 获取模拟需求
-        simulation_requirement = ResearchSimulationAdapter.requirement_for(\n            simulation_id, project.simulation_requirement or ""\n        )\n        if not simulation_requirement:
+        simulation_requirement = ResearchSimulationAdapter.requirement_for(
+            simulation_id, project.simulation_requirement or ""
+        )
+        if not simulation_requirement:
             return jsonify({
                 "success": False,
                 "error": t('api.projectMissingRequirement')
