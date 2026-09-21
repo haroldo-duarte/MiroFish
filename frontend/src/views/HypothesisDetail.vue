@@ -60,7 +60,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { researchApi } from '../api/research'
 const route=useRoute(), hypothesis=ref(null), assessment=ref(null), evidence=ref([]), experiments=ref([]), findings=ref([]), error=ref('')
-const projectId=ref(''), simulating=ref(false), simulationResult=ref(null)\nconst evidenceDraft=ref({title:'',evidence_type:'observational',direction:'supports',summary:''})\nconst experimentDraft=ref({name:'',method:'',metric:''})
+const projectId=ref(''), simulating=ref(false), simulationResult=ref(null)
+const evidenceDraft=ref({title:'',evidence_type:'observational',direction:'supports',summary:''})
+const experimentDraft=ref({name:'',method:'',metric:''})
 const linkedEvidence=computed(()=>evidence.value.filter(e=>e.hypothesis_ids?.includes(route.params.hypothesisId)))
 const linkedExperiments=computed(()=>experiments.value.filter(e=>e.hypothesis_ids?.includes(route.params.hypothesisId)))
 const linkedFindings=computed(()=>findings.value.filter(f=>f.hypothesis_id===route.params.hypothesisId))
