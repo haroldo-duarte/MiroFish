@@ -16,6 +16,7 @@ from ..services.simulation_runner import SimulationRunner, RunnerStatus
 from ..services.zep_graph_memory_updater import ZepGraphMemoryManager
 from ..models.project import ProjectManager, ProjectStatus
 from ..services.research.simulation_adapter import ResearchSimulationAdapter
+from ..services.research.report_finding_bridge import ReportFindingBridge
 from ..models.task import TaskManager, TaskStatus
 from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
@@ -269,9 +270,7 @@ def generate_report():
                         progress_callback=progress_callback,
                         report_id=report_id
                     )
-                    ReportManager.save_report(report)
-
-                    if report.status == ReportStatus.COMPLETED:
+                    ReportManager.save_report(report)\n\n                    if report.status == ReportStatus.COMPLETED:\n                        ReportFindingBridge.import_report(\n                            simulation_id=simulation_id,\n                            report_id=report.report_id,\n                            markdown_content=report.markdown_content,\n                        )\n\n                    if report.status == ReportStatus.COMPLETED:
                         task_manager.complete_task(
                             task_id,
                             result={
