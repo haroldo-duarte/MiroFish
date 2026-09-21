@@ -1,39 +1,45 @@
-# Toyt Research Lab — Phase 1
+# Toyt Research Lab — Phase 2
 
-This branch introduces the epistemic layer around MiroFish without changing
-the existing simulation engine.
+The Research Lab is an epistemic layer around MiroFish. Existing graph/Zep,
+OASIS simulation and ReportAgent behavior remains intact.
 
-## Goal
+## Core cycle
 
-Represent research as a traceable cycle:
-
-Hypothesis -> Evidence / Experiment / Simulation -> Finding -> revised hypothesis.
-
-Phase 1 implements the first three durable concepts:
-
-- Hypothesis
-- Evidence
-- Experiment
-
-The existing Project, graph/Zep, OASIS simulation and ReportAgent pipeline is
-left intact.
+Hypothesis -> Evidence / Experiment / Simulation -> Finding -> Assessment.
 
 ## API
 
-Base path: `/api/research`
+Base: `/api/research`
 
 - `GET /health`
 - `GET|POST /hypotheses`
+- `GET /hypotheses/<id>`
+- `GET /hypotheses/<id>/assessment`
+- `POST /hypotheses/<id>/simulate`
 - `GET|POST /evidence`
 - `GET|POST /experiments`
+- `GET|POST /findings`
+- `GET /simulation-links`
 
-All records have a `domain` field; the MVP defaults to `toyt`. GET endpoints
-accept `?domain=toyt`.
+Evidence can link to hypotheses with `hypothesis_ids` and a direction:
+`supports`, `contradicts`, or `neutral`.
+
+## Epistemic safety
+
+Simulation is not empirical proof. The evaluator down-weights simulated
+evidence and simulation alone can only move an untested hypothesis to
+`signal`, never to `supported`.
+
+## Simulation adapter
+
+`POST /hypotheses/<id>/simulate` accepts an existing MiroFish `project_id`
+(and optionally `graph_id`). It creates a normal MiroFish SimulationState and
+stores a Research Lab link plus a generated research-oriented simulation
+requirement. Preparation/running continues through the existing MiroFish
+pipeline, keeping this integration intentionally non-invasive.
 
 ## Next milestone
 
-1. Link evidence bidirectionally to hypotheses.
-2. Add Finding and epistemic evaluation.
-3. Add a simulation adapter that invokes the existing MiroFish pipeline from a hypothesis.
-4. Add Research Lab routes/views to the Vue frontend.
-5. Add tests before generalizing OASIS beyond social-network agents.
+Build the Vue Research Lab UI (uncertainty map and hypothesis detail), expose
+the generated requirement to the existing prepare flow, and convert completed
+ReportAgent output into traceable Findings.
