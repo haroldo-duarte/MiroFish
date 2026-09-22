@@ -404,6 +404,46 @@ class GraphBuilderService:
                 edges=edge_definitions if edge_definitions else None,
             )
     
+    def add_research_episodes(self, graph_id, episodes, batch_size=350):
+        """Submit pre-serialized research episodes with per-episode metadata."""
+        if not graph_id:
+            raise ValueError("graph_id is required")
+        if not episodes:
+            return BatchSubmission(batch_id="", operation_id="", episode_uuids=[], item_count=0)
+        chunks = [episode.data for episode in episodes]
+        self.validate_batch_chunks(chunks, batch_size=batch_size)
+        operation_id = self.build_operation_id(graph_id, chunks)
+        batch = self.client.batch.create(metadata={
+            "mirofish_operation_id": operation_id,
+            "graph_id": graph_id,
+            "chunk_count": len(episodes),
+            "mirofish_kind": "research_world_snapshot",
+        })
+        batch_id = getattr(batch, "batch_id", None)
+        if not batch_id:
+            raise RuntimeError("Zep Batch API returned no batch_id")
+        episode_uuids = []
+        for i in range(0, len(episodes), batch_size):
+            items = []
+            for offset, episode in enumerate(episodes[i:i + batch_size]):
+                metadata = dict(episode.metadata)
+                metadata.update({
+                    "mirofish_operation_id": operation_id,
+                    "chunk_index": i + offset,
+                })
+                items.append(BatchAddItem(
+                    type="graph_episode", graph_id=graph_id, data=episode.data,
+                    data_type="text", source_description="MiroFish Research Lab world snapshot",
+                    metadata=metadata,
+                ))
+            details = self.client.batch.add(batch_id=batch_id, items=items)
+            for detail in details or []:
+                uuid_ = getattr(detail, "episode_uuid", None) or getattr(detail, "uuid_", None)
+                if uuid_:
+                    episode_uuids.append(uuid_)
+        return BatchSubmission(batch_id=batch_id, operation_id=operation_id,
+                               episode_uuids=episode_uuids, item_count=len(episodes))
+
     def add_text_batches(
         self,
         graph_id: str,
