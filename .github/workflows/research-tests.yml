@@ -3,7 +3,7 @@ name: Research Lab tests
 on:
   workflow_dispatch:
   push:
-    branches: [main, research-lab, npc-data-blueprint, world-agent-pipeline, research-relations-memory-oasis, research-oasis-rounds, research-report-epistemic-loop, research-privacy-boundary, research-zep-world-ingestion, research-oasis-config-integration, research-runtime-flow]
+    branches: [main, research-lab, npc-data-blueprint, world-agent-pipeline, research-relations-memory-oasis, research-oasis-rounds, research-report-epistemic-loop, research-privacy-boundary, research-zep-world-ingestion, research-oasis-config-integration, research-runtime-flow, research-structured-findings]
   pull_request:
     branches: [main]
 
