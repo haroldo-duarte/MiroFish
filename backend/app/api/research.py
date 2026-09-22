@@ -4,6 +4,7 @@ from ..models.hypothesis import Hypothesis, HypothesisCategory, HypothesisStatus
 from ..models.evidence import Evidence
 from ..models.experiment import Experiment
 from ..models.finding import Finding
+from ..models.research_hierarchy import ResearchDomain, Study, ResearchQuestion
 from ..services.research.repository import ResearchRepository
 from ..services.research.epistemic_evaluator import EpistemicEvaluator
 from ..services.research.simulation_adapter import ResearchSimulationAdapter
@@ -13,6 +14,57 @@ research_bp = Blueprint("research", __name__)
 @research_bp.get("/health")
 def health():
     return {"status": "ok", "module": "research-lab", "phase": 2}
+
+
+@research_bp.get("/domains")
+def list_domains():
+    return jsonify(ResearchRepository.list("domains"))
+
+@research_bp.post("/domains")
+def create_domain():
+    data = request.get_json(silent=True) or {}
+    name, slug = str(data.get("name") or "").strip(), str(data.get("slug") or "").strip().lower()
+    if not name or not slug:
+        return {"error": "name and slug are required"}, 400
+    if any(d.get("slug") == slug for d in ResearchRepository.list("domains")):
+        return {"error": "domain slug already exists"}, 409
+    item = ResearchDomain(name=name, slug=slug, description=str(data.get("description") or ""))
+    return jsonify(ResearchRepository.create("domains", item.to_dict())), 201
+
+@research_bp.get("/studies")
+def list_studies():
+    domain_id = request.args.get("domain_id")
+    rows = ResearchRepository.list("studies")
+    return jsonify([r for r in rows if not domain_id or r.get("domain_id") == domain_id])
+
+@research_bp.post("/studies")
+def create_study():
+    data = request.get_json(silent=True) or {}
+    domain_id, title = str(data.get("domain_id") or ""), str(data.get("title") or "").strip()
+    if not ResearchRepository.get("domains", domain_id):
+        return {"error": "domain not found"}, 404
+    if not title:
+        return {"error": "title is required"}, 400
+    item = Study(domain_id=domain_id, title=title, problem=str(data.get("problem") or ""),
+                 source_keys=data.get("source_keys") or [])
+    return jsonify(ResearchRepository.create("studies", item.to_dict())), 201
+
+@research_bp.get("/questions")
+def list_questions():
+    study_id = request.args.get("study_id")
+    rows = ResearchRepository.list("questions")
+    return jsonify([r for r in rows if not study_id or r.get("study_id") == study_id])
+
+@research_bp.post("/questions")
+def create_question():
+    data = request.get_json(silent=True) or {}
+    study_id, question = str(data.get("study_id") or ""), str(data.get("question") or "").strip()
+    if not ResearchRepository.get("studies", study_id):
+        return {"error": "study not found"}, 404
+    if not question:
+        return {"error": "question is required"}, 400
+    item = ResearchQuestion(study_id=study_id, question=question)
+    return jsonify(ResearchRepository.create("questions", item.to_dict())), 201
 
 @research_bp.get("/hypotheses")
 def list_hypotheses():
@@ -37,6 +89,7 @@ def create_hypothesis():
         return {"error": "invalid status"}, 400
     item = Hypothesis(statement=statement, category=category,
         domain=str(data.get("domain") or "toyt").lower(),
+        question_id=str(data.get("question_id") or ""), study_id=str(data.get("study_id") or ""),
         importance=str(data.get("importance") or "medium").lower(), status=status)
     return jsonify(ResearchRepository.create("hypotheses", item.to_dict())), 201
 

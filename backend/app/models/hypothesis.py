@@ -27,6 +27,8 @@ class Hypothesis:
     statement: str
     category: str
     domain: str = "toyt"
+    question_id: str = ""
+    study_id: str = ""
     importance: str = "medium"
     status: str = HypothesisStatus.UNTESTED.value
     hypothesis_id: str = field(default_factory=lambda: f"hyp_{uuid.uuid4().hex[:12]}")
