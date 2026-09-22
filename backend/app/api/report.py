@@ -16,7 +16,7 @@ from ..services.simulation_runner import SimulationRunner, RunnerStatus
 from ..services.zep_graph_memory_updater import ZepGraphMemoryManager
 from ..models.project import ProjectManager, ProjectStatus
 from ..services.research.simulation_adapter import ResearchSimulationAdapter
-from ..services.research.report_finding_bridge import ReportFindingBridge
+from ..services.research.research_report_loop import ResearchReportLoop
 from ..models.task import TaskManager, TaskStatus
 from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
@@ -276,7 +276,7 @@ def generate_report():
                     ReportManager.save_report(report)
 
                     if report.status == ReportStatus.COMPLETED:
-                        ReportFindingBridge.import_report(
+                        ResearchReportLoop.process(
                             simulation_id=simulation_id,
                             report_id=report.report_id,
                             markdown_content=report.markdown_content,
