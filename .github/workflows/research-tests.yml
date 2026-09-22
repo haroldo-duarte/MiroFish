@@ -1,6 +1,7 @@
 name: Research Lab tests
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, research-lab, npc-data-blueprint]
   pull_request:
@@ -18,9 +19,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install --upgrade pip pytest
-      - name: Run isolated Research Lab unit tests
-        run: |
-          pytest -q \
-            tests/test_research_source_semantics.py \
-            tests/test_research_agent_seed_builder.py \
-            tests/test_research_hierarchy.py
+      - name: Install backend
+        run: python -m pip install -e ".[dev]"
+      - name: Run full backend test suite
+        run: pytest -q tests
