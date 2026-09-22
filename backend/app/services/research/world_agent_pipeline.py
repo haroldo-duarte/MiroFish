@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List
 from .npc_adapter import NormalizedRecord, SyntheticAgentSeed
 from .agent_seed_builder import SyntheticAgentSeedBuilder
 from .source_semantics import SourceSemanticClass
+from .privacy_guard import ResearchPrivacyGuard
 
 
 @dataclass
@@ -46,6 +47,7 @@ class WorldAgentPipeline:
     @classmethod
     def build(cls, records: Iterable[NormalizedRecord], cohorts: Dict[str, Dict[str, str]]) -> WorldSnapshot:
         records = list(records)
+        ResearchPrivacyGuard.assert_safe_records(records)
         facts = [
             WorldFact(
                 fact_type=r.record_type,
