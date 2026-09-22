@@ -3,7 +3,7 @@ name: Research Lab tests
 on:
   workflow_dispatch:
   push:
-    branches: [main, research-lab, npc-data-blueprint, world-agent-pipeline]
+    branches: [main, research-lab, npc-data-blueprint, world-agent-pipeline, research-relations-memory-oasis]
   pull_request:
     branches: [main]
 
