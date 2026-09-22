@@ -13,8 +13,9 @@ from ...config import Config
 class ResearchRepository:
     _lock = threading.RLock()
     ROOT = os.path.join(Config.UPLOAD_FOLDER, "research")
-    COLLECTIONS = {"hypotheses", "evidence", "experiments", "findings", "simulation_links"}
+    COLLECTIONS = {"domains", "studies", "questions", "hypotheses", "evidence", "experiments", "findings", "simulation_links"}
     ID_FIELDS = {
+        "domains": "domain_id", "studies": "study_id", "questions": "question_id",
         "hypotheses": "hypothesis_id", "evidence": "evidence_id",
         "experiments": "experiment_id", "findings": "finding_id",
         "simulation_links": "simulation_id",
