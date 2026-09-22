@@ -19,6 +19,7 @@ from ..services.simulation_runner import (
     SimulationStopPending,
 )
 from ..services.zep_graph_memory_updater import ZepGraphMemoryManager
+from ..services.research.research_runtime_flow import ResearchRuntimeFlow
 from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
 from ..utils.zep_lifecycle import get_graph_readers, graph_lifecycle_lock
@@ -1694,6 +1695,15 @@ def start_simulation():
                     "error": t('api.graphIdRequiredForMemory')
                 }), 400
 
+        research_policy = ResearchRuntimeFlow.start_policy(simulation_id, graph_id, max_rounds)
+        research_envelope = None
+        if research_policy:
+            platform = research_policy["platform"]
+            max_rounds = research_policy["max_rounds"]
+            enable_graph_memory_update = research_policy["enable_graph_memory_update"]
+            graph_id = research_policy["graph_id"]
+            research_envelope = research_policy["research_envelope"]
+
         graph_guard = (
             graph_lifecycle_lock(graph_id)
             if enable_graph_memory_update
@@ -1765,6 +1775,9 @@ def start_simulation():
             response_data['max_rounds_applied'] = max_rounds
         response_data['graph_memory_update_enabled'] = enable_graph_memory_update
         response_data['force_restarted'] = force_restarted
+        if research_envelope:
+            response_data['research_envelope'] = research_envelope
+            response_data['epistemic_notice'] = 'Simulation rounds and agent actions are synthetic outputs, not empirical observations.'
         if enable_graph_memory_update:
             response_data['graph_id'] = graph_id
         
